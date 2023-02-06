@@ -81,16 +81,19 @@ ENGINE = InnoDB;
 -- Table `mydb`.`Patient`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`Patient` (
-  `patient_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `patientid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `ssn` VARCHAR(45) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `first_name` VARCHAR(45) NULL,
+  `last_name` VARCHAR(45) NULL,
   `city` VARCHAR(45) NULL,
   `state` VARCHAR(2) NULL,
   `street` VARCHAR(45) NULL,
+  `zipcode` VARCHAR(5) NULL,
   `birthday` DATE NULL,
-  `Doctor_id` INT NOT NULL,
-  PRIMARY KEY (`patient_id`),
-  INDEX `fk_Patient_Doctor1_idx` (`Doctor_id` ASC) VISIBLE,
+  `Doctor_id` INT NULL,
+  `doctor_name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`patientid`),
+  INDEX `fk_Patient_Doctor1_idx` (`doctor_name` ASC) VISIBLE,
   CONSTRAINT `fk_Patient_Doctor1`
     FOREIGN KEY (`Doctor_id`)
     REFERENCES `mydb`.`Doctor` (`id`)
@@ -107,8 +110,9 @@ CREATE TABLE IF NOT EXISTS `mydb`.`drug` (
   `trade_name` VARCHAR(100) NULL,
   `formula` VARCHAR(200) NULL,
   `generic_name` VARCHAR(45) NULL,
-  `Pharmacy_sells_Drug_pharmacy_id` INT NOT NULL,
-  PRIMARY KEY (`drug_id`, `Pharmacy_sells_Drug_pharmacy_id`))
+  -- `Pharmacy_sells_Drug_pharmacy_id` INT NOT NULL,
+  PRIMARY KEY (`drug_id`))
+  -- PRIMARY KEY (`drug_id`, `Pharmacy_sells_Drug_pharmacy_id`))
 ENGINE = InnoDB;
 
 
@@ -139,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Prescription` (
     ON UPDATE NO ACTION,
   CONSTRAINT `prescription.patient`
     FOREIGN KEY (`patient`)
-    REFERENCES `mydb`.`Patient` (`patient_id`)
+    REFERENCES `mydb`.`Patient` (`patientid`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `prescription.pharmacy`
@@ -175,8 +179,10 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Pharmacy_sells_Drug` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Pharmacy_sells_Drug_drug1`
-    FOREIGN KEY (`drug_drug_id` , `drug_Pharmacy_sells_Drug_pharmacy_id`)
-    REFERENCES `mydb`.`drug` (`drug_id` , `Pharmacy_sells_Drug_pharmacy_id`)
+  FOREIGN KEY (`drug_drug_id`)
+    REFERENCES `mydb`.`drug` (`drug_id`)
+    -- FOREIGN KEY (`drug_drug_id` , `drug_Pharmacy_sells_Drug_pharmacy_id`)
+    -- REFERENCES `mydb`.`drug` (`drug_id` , `Pharmacy_sells_Drug_pharmacy_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -193,8 +199,10 @@ CREATE TABLE IF NOT EXISTS `mydb`.`drug_has_PharmaceuticalCompany` (
   INDEX `fk_drug_has_PharmaceuticalCompany_PharmaceuticalCompany1_idx` (`PharmaceuticalCompany_Pharm Co name` ASC) VISIBLE,
   INDEX `fk_drug_has_PharmaceuticalCompany_drug1_idx` (`drug_drug_id` ASC, `drug_Pharmacy_sells_Drug_pharmacy_id` ASC) VISIBLE,
   CONSTRAINT `fk_drug_has_PharmaceuticalCompany_drug1`
-    FOREIGN KEY (`drug_drug_id` , `drug_Pharmacy_sells_Drug_pharmacy_id`)
-    REFERENCES `mydb`.`drug` (`drug_id` , `Pharmacy_sells_Drug_pharmacy_id`)
+    FOREIGN KEY (`drug_drug_id`)
+    -- FOREIGN KEY (`drug_drug_id` , `drug_Pharmacy_sells_Drug_pharmacy_id`)
+    REFERENCES `mydb`.`drug` (`drug_id`)
+    -- REFERENCES `mydb`.`drug` (`drug_id` , `Pharmacy_sells_Drug_pharmacy_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_drug_has_PharmaceuticalCompany_PharmaceuticalCompany1`
