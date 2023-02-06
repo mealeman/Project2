@@ -67,12 +67,13 @@ ENGINE = InnoDB;
 -- Table `mydb`.`Doctor`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`Doctor` (
-  `doctor_id` INT NOT NULL AUTO_INCREMENT,
-  `ssn` VARCHAR(45) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `last_name` VARCHAR(45) NOT NULL,
+  `first_name` VARCHAR(45) NOT NULL,
+  `ssn` CHAR(11) NOT NULL,
   `specialty` VARCHAR(45) NOT NULL,
-  `yearsexperience` INT NOT NULL,
-  PRIMARY KEY (`doctor_id`))
+  `practice_since` CHAR (4) NOT NULL,
+  PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
 
@@ -87,12 +88,12 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Patient` (
   `state` VARCHAR(2) NULL,
   `street` VARCHAR(45) NULL,
   `birthday` DATE NULL,
-  `Doctor_doctor_id` INT NOT NULL,
+  `Doctor_id` INT NOT NULL,
   PRIMARY KEY (`patient_id`),
-  INDEX `fk_Patient_Doctor1_idx` (`Doctor_doctor_id` ASC) VISIBLE,
+  INDEX `fk_Patient_Doctor1_idx` (`Doctor_id` ASC) VISIBLE,
   CONSTRAINT `fk_Patient_Doctor1`
-    FOREIGN KEY (`Doctor_doctor_id`)
-    REFERENCES `mydb`.`Doctor` (`doctor_id`)
+    FOREIGN KEY (`Doctor_id`)
+    REFERENCES `mydb`.`Doctor` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -133,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Prescription` (
   INDEX `drug.drug_id_idx` (`drug_id` ASC) VISIBLE,
   CONSTRAINT `prescription.doctor`
     FOREIGN KEY (`doctor`)
-    REFERENCES `mydb`.`Doctor` (`doctor_id`)
+    REFERENCES `mydb`.`Doctor` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `prescription.patient`
