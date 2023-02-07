@@ -43,6 +43,136 @@ public class ControllerPatient {
 	public String newPatient(Patient p, Model model) {
 
 		// TODO
+		
+		String errMessage = "";
+		int currYear = 2023;
+		
+		try (Connection con = getConnection();) {
+			PreparedStatement ps = con.prepareStatement("insert into patient(ssn, first_name, "
+					+ "last_name, birthday, street, city, state, zipcode, doctor_name, Doctor_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+					Statement.RETURN_GENERATED_KEYS);			
+			ps.setString(1, p.getSsn());
+			ps.setString(2, p.getFirst_name());
+			ps.setString(3, p.getLast_name());
+			ps.setString(4, p.getBirthdate());
+			ps.setString(5, p.getStreet());
+			ps.setString(6, p.getCity());
+			ps.setString(7, p.getState());
+			ps.setString(8, p.getZipcode());	
+			ps.setString(9, p.getPrimaryName());
+			
+			Statement stmt = con.createStatement();			
+			ResultSet result = stmt.executeQuery("select id from doctor where concat(first_name, ' ',last_name) = '" + p.getPrimaryName() + "'");
+
+			
+			if(p.getSsn().isEmpty() || p.getSsn().length() != 9 || p.getSsn().matches("[0-9]+") == false || 
+					p.getSsn().charAt(0) == '0' || p.getSsn().charAt(0) == '9' || p.getSsn().substring(3,5).equals("00") ||
+					p.getSsn().substring(5,9).equals("0000")) {
+				
+				errMessage = "Please enter a valid SSN";
+				throw new SQLException(errMessage);
+			}
+			
+			if(p.getFirst_name().isEmpty() || p.getLast_name().isEmpty() || 
+					!(p.getFirst_name().matches("[a-zA-Z]+")) || !(p.getLast_name().matches("[a-zA-Z]+"))) {				
+				
+				errMessage = "Please enter valid name entries (letters only).";
+				throw new SQLException(errMessage);
+			}			
+			
+			if(p.getBirthdate().isEmpty()) {
+				errMessage = "Please enter valid birthdate.";
+				throw new SQLException(errMessage);
+			}			
+				
+			String birthDate = p.getBirthdate().substring(0,4);				
+			int year = Integer.parseInt(birthDate);		
+			
+			if(year < 1900 || year > 2022) {
+				errMessage = "Please enter valid birthdate (years between 1900-2022).";
+				throw new SQLException(errMessage);
+			}
+			
+			int age = currYear - year;
+			
+			if(p.getCity().isEmpty() || !(p.getCity().matches("[a-zA-Z]+"))) {
+				errMessage = "Please enter valid city.";
+				throw new SQLException(errMessage);
+			}
+			
+			if(p.getState().isEmpty() || !(p.getState().matches("[a-zA-Z]+"))) {
+				errMessage = "Please enter valid state.";
+				throw new SQLException(errMessage);
+			}
+			
+			if(!(p.getZipcode().matches("[-0-9]+")) || !(p.getZipcode().length() == 5 || p.getZipcode().length() == 10)) {				
+				
+				errMessage = "Please enter a valid zip code.";
+				throw new SQLException(errMessage);
+			}	
+			
+			if(p.getZipcode().length() > 5 && ((p.getZipcode().charAt(5) != '-') || !(p.getZipcode().substring(6,10).matches("[0-9]+")))) {	
+				errMessage = "Please enter a valid zip code (12345-1234)";
+				throw new SQLException(errMessage);
+			}
+
+			if(!result.isBeforeFirst()){                
+                errMessage = "Please enter a valid Doctor Name";
+            }
+			else{
+        	   result.next();
+   			   
+   			   p.setPrimaryID(result.getInt(1));
+   			   ps.setInt(10, p.getPrimaryID()); 
+   			   
+   			   Statement drStmt = con.createStatement();		   			   
+   			   ResultSet drResult = drStmt.executeQuery("select specialty from doctor where concat(first_name, ' ',last_name) = '" + p.getPrimaryName() + "'");	   
+   			   
+   			   drResult.next();	
+   			   
+   			   if(age < 18 && !(drResult.getString("specialty").equalsIgnoreCase("pediatrics"))) {
+   				   errMessage = "Child patients must select a Pediatrician.";
+   				   throw new SQLException(errMessage);
+   			   }
+   			   if(age >= 18) {
+   				   if(drResult.getString("specialty").equalsIgnoreCase("pediatrics")) {
+   					   errMessage = "Adult patients cannot select a Pediatrician.";
+	   				   throw new SQLException(errMessage);
+   				   }   				  
+   				   if(!(drResult.getString("specialty").equalsIgnoreCase("family medicine") || 
+   						   drResult.getString("specialty").equalsIgnoreCase("internal medicine"))) {
+   					   errMessage = "Adult patients must select a Family or Internal Medicine physician.";
+	   				   throw new SQLException(errMessage);
+   				   }	   				   
+   			   }
+            }							
+
+			ps.executeUpdate();
+			ResultSet rs = ps.getGeneratedKeys();			
+			
+			if (rs.next()) p.setPatientId((String)rs.getString(1));		
+			
+			// display message and patient information
+			model.addAttribute("message", "Registration successful.");
+			model.addAttribute("patient", p);
+			
+		} catch (SQLException e) {
+			
+			if (errMessage == "") {
+				model.addAttribute("message", "SQL Error."+e.getMessage());
+			}
+			else {
+				model.addAttribute("message", errMessage);
+			}
+			model.addAttribute("patient", p);
+			
+			return "patient_register";
+		} catch (NullPointerException ex) {
+			model.addAttribute("message", errMessage);
+			model.addAttribute("patient", p);
+			
+			return "patient_register";
+		}
 
 		/*
 		 * Complete database logic to verify and process new patient
