@@ -44,6 +44,51 @@ public class ControllerPrescriptionCreate {
 		int patientid;
 		int drugid;
 		
+		String invalidCharacters = ".*[!@#$%^&*()]+.*";
+		String validSSN = "^\\d{9}$";
+		
+		if(p.getDoctor_ssn().equals("") || p.getDoctorFirstName().equals("") || p.getDoctorLastName().equals("") || p.getPatient_ssn().equals("") || p.getPatientFirstName().equals("") || p.getPatientLastName().equals("") || p.getDrugName().equals("")) {
+			model.addAttribute("message", "Invalid: Blank fields");
+			model.addAttribute("prescription", p);
+			return "prescription_create";
+		}
+		
+		if(!p.getDoctor_ssn().matches(validSSN)) {
+			model.addAttribute("message", "Invalid SSN: Doctor");
+			model.addAttribute("prescription", p);
+			return "prescription_create";
+		}
+		
+		if(!p.getPatient_ssn().matches(validSSN)) {
+			model.addAttribute("message", "Invalid SSN: Patient");
+			model.addAttribute("prescription", p);
+			return "prescription_create";
+		}
+		
+		if(p.getDoctorFirstName().matches(invalidCharacters) || p.getDoctorLastName().matches(invalidCharacters)) {
+			model.addAttribute("message", "Invalid Characters: Doctor Name");
+			model.addAttribute("prescription", p);
+			return "prescription_create";
+		}
+		
+		if(p.getPatientFirstName().matches(invalidCharacters) || p.getPatientLastName().matches(invalidCharacters)) {
+			model.addAttribute("message", "Invalid Characters: Patient Name");
+			model.addAttribute("prescription", p);
+			return "prescription_create";
+		}
+		
+		if(p.getDrugName().matches(invalidCharacters)) {
+			model.addAttribute("message", "Invalid Characters: Drug Name");
+			model.addAttribute("prescription", p);
+			return "prescription_create";
+		}
+		
+		if(p.getQuantity() < 1) {
+			model.addAttribute("message", "Quantity cannot be less than one");
+			model.addAttribute("prescription", p);
+			return "prescription_create";
+		}
+		
 		//ensure doctor exists
 		try(Connection con=getConnection();){
 			PreparedStatement ps = con.prepareStatement("select id from Doctor where ssn=? and first_name=? and last_name=?");
