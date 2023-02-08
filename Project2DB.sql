@@ -127,14 +127,15 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Prescription` (
   `date` DATE NULL,
   `quantity` INT UNSIGNED NOT NULL,
   `price` INT UNSIGNED NULL,
-  `pharmacy` INT NULL,
+  `pharmacy_id` INT NULL,
+  `pharmacy_name` VARCHAR(45) NULL,
   `company` VARCHAR(45) NULL,
   `doctor` INT NOT NULL,
   `patient` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`rxnumber`),
   INDEX `doctor_idx` (`doctor` ASC) VISIBLE,
   INDEX `patient_idx` (`patient` ASC) VISIBLE,
-  INDEX `fk_Prescription_1_idx` (`pharmacy` ASC) VISIBLE,
+  INDEX `fk_Prescription_1_idx` (`pharmacy_id` ASC) VISIBLE,
   INDEX `company_idx` (`company` ASC) VISIBLE,
   INDEX `drug.drug_id_idx` (`drug_id` ASC) VISIBLE,
   CONSTRAINT `prescription.doctor`
@@ -148,7 +149,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Prescription` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `prescription.pharmacy`
-    FOREIGN KEY (`pharmacy`)
+    FOREIGN KEY (`pharmacy_id`)
     REFERENCES `mydb`.`Pharmacy` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
