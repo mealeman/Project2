@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
+
 @Controller   
 public class ControllerPrescriptionFill {
 
@@ -37,7 +38,7 @@ public class ControllerPrescriptionFill {
 	 *     		and uniquely identify a prescription and a pharmacy.
 	 * 2.  DONE update prescription with pharmacyid, name and address.
 	 * 3.  DONE update prescription with today's date.
-	 * 4.  Display updated prescription 
+	 * 4.  DONE Display updated prescription 
 	 * 5.  or if there is an error show the form with an error message.
 	 */
 	@PostMapping("/prescription/fill")
@@ -45,7 +46,6 @@ public class ControllerPrescriptionFill {
 
 		
 		if(!p.getRxid().equals("") && !p.getPharmacyName().equals("") && !p.getPharmacyAddress().equals("")) {
-			model.addAttribute("message", "Rxid is" + p.getRxid());
 	
 			// check the rx number goes to a prescription
 			try(Connection con=getConnection();){
@@ -164,6 +164,8 @@ public class ControllerPrescriptionFill {
 	/*
 	 * return JDBC Connection using jdbcTemplate in Spring Server
 	 */
+
+
 
 	private Connection getConnection() throws SQLException {
 		Connection conn = jdbcTemplate.getDataSource().getConnection();
