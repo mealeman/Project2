@@ -55,13 +55,13 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Contract` (
   CONSTRAINT `fk_Contract_Pharmacy1`
     FOREIGN KEY (`Pharmacy_id`)
     REFERENCES `mydb`.`Pharmacy` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE cascade
+    ON UPDATE cascade,
   CONSTRAINT `fk_Contract_PharmaceuticalCompany1`
     FOREIGN KEY (`PharmaceuticalCompany_Pharm Co name`)
     REFERENCES `mydb`.`PharmaceuticalCompany` (`Pharm Co name`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE cascade
+    ON UPDATE cascade)
 ENGINE = InnoDB;
 
 
@@ -141,28 +141,28 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Prescription` (
   CONSTRAINT `prescription.doctor`
     FOREIGN KEY (`doctor`)
     REFERENCES `mydb`.`Doctor` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE cascade
+    ON UPDATE cascade,
   CONSTRAINT `prescription.patient`
     FOREIGN KEY (`patient`)
     REFERENCES `mydb`.`Patient` (`patientid`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE cascade
+    ON UPDATE cascade,
   CONSTRAINT `prescription.pharmacy`
     FOREIGN KEY (`pharmacy_id`)
     REFERENCES `mydb`.`Pharmacy` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE cascade
+    ON UPDATE cascade,
   CONSTRAINT `prescription.company`
     FOREIGN KEY (`company`)
     REFERENCES `mydb`.`PharmaceuticalCompany` (`Pharm Co name`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE cascade
+    ON UPDATE cascade,
   CONSTRAINT `drug.drug_id`
     FOREIGN KEY (`drug_id`)
     REFERENCES `mydb`.`drug` (`drug_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE cascade
+    ON UPDATE cascade)
 ENGINE = InnoDB;
 
 
@@ -178,15 +178,15 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Pharmacy_sells_Drug` (
   CONSTRAINT `fk_Pharmacy_sells_Drug_Pharmacy1`
     FOREIGN KEY (`Pharmacy_id`)
     REFERENCES `mydb`.`Pharmacy` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE cascade
+    ON UPDATE cascade,
   CONSTRAINT `fk_Pharmacy_sells_Drug_drug1`
   FOREIGN KEY (`drug_drug_id`)
     REFERENCES `mydb`.`drug` (`drug_id`)
     -- FOREIGN KEY (`drug_drug_id` , `drug_Pharmacy_sells_Drug_pharmacy_id`)
     -- REFERENCES `mydb`.`drug` (`drug_id` , `Pharmacy_sells_Drug_pharmacy_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE cascade
+    ON UPDATE cascade)
 ENGINE = InnoDB;
 
 
@@ -205,13 +205,13 @@ CREATE TABLE IF NOT EXISTS `mydb`.`drug_has_PharmaceuticalCompany` (
     -- FOREIGN KEY (`drug_drug_id` , `drug_Pharmacy_sells_Drug_pharmacy_id`)
     REFERENCES `mydb`.`drug` (`drug_id`)
     -- REFERENCES `mydb`.`drug` (`drug_id` , `Pharmacy_sells_Drug_pharmacy_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE cascade
+    ON UPDATE cascade,
   CONSTRAINT `fk_drug_has_PharmaceuticalCompany_PharmaceuticalCompany1`
     FOREIGN KEY (`PharmaceuticalCompany_Pharm Co name`)
     REFERENCES `mydb`.`PharmaceuticalCompany` (`Pharm Co name`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE cascade
+    ON UPDATE cascade)
 ENGINE = InnoDB;
 
 
@@ -219,32 +219,112 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
-/*
-select d.name from Doctor d join Patient p on p.primarydoctorssn=d.ssn
-group by d.name having count(p.ssn)>=3;
-select genericname
-from Prescription
-group by genericname
-having count(genericname) =
-    (select max(generic_count) as max_count
-	from (select genericname, count(genericname) as generic_count
-	from Prescription
-	group by genericname) as p1);
-select Pharmacy
-from Pharmacy p
-    join Prescription d on d.pharmacy = p.name
-group by pharmacy
-having count(genericname) =
-    (select min(generic_count) as min_count
-	from (select genericname, count(genericname) as generic_count
-	from Prescription
-	group by genericname) as p1);
-    
-select name, startdate
-from Contract
-order by startdate asc
-limit 1;
-select count(*) as Brand_Name_Count
-from Prescription
-where tradename != 'null';
-*/
+--
+-- Table structure for table `drug`
+--
+
+INSERT INTO `drug` VALUES 
+(1,'Tylenol with Codeine','acetaminophen and codeine'),
+(2,'Proair Proventil','albuterol aerosol'),
+(3,'Accuneb','albuterol HFA'),
+(4,'Fosamax','alendronate'),
+(5,'Zyloprim','allopurinol'),
+(6,'Xanax','alprazolam'),
+(7,'Elavil','amitriptyline'),
+(8,'Augmentin','amoxicillin and clavulanate K+'),
+(9,'Amoxil','amoxicillin'),
+(10,'Adderall XR','amphetamine and dextroamphetamine XR'),
+(11,'Tenormin','atenolol'),
+(12,'Lipitor','atorvastatin'),
+(13,'Zithromax','azithromycin'),
+(14,'Lotrel','benazepril and amlodipine'),
+(15,'Soma','carisoprodol'),
+(16,'Coreg','carvedilol'),
+(17,'Omnicef','cefdinir'),
+(18,'Celebrex','celecoxib'),
+(19,'Keflex','cephalexin'),
+(20,'Cipro','ciprofloxacin'),
+(21,'Celexa','citalopram'),
+(22,'Klonopin','clonazepam'),
+(23,'Catapres','clonidine HCl'),
+(24,'Plavix','clopidogrel'),
+(25,'Premarin','conjugated estrogens'),
+(26,'Flexeril','cyclobenzaprine'),
+(27,'Valium','diazepam'),
+(28,'Voltaren','diclofenac sodium'),
+(29,'Yaz','drospirenone and ethinyl estradiol'),
+(30,'Cymbalta','Duloxetine'),
+(31,'Vibramycin','doxycycline hyclate'),
+(32,'Vasotec','enalapril'),
+(33,'Lexapro','escitalopram'),
+(34,'Nexium','esomeprazole'),
+(35,'Zetia','ezetimibe'),
+(36,'Tricor','fenofibrate'),
+(37,'Allegra','fexofenadine'),
+(38,'Diflucan','fluconozole'),
+(39,'Prozac','fluoxetine HCl'),
+(40,'Advair','fluticasone and salmeterol inhaler'),
+(41,'Flonase','fluticasone nasal spray'),
+(42,'Folic Acid','folic acid'),
+(43,'Lasix','furosemide'),
+(44,'Neurontin','gabapentin'),
+(45,'Amaryl','glimepiride'),
+(46,'Diabeta','glyburide'),
+(47,'Glucotrol','glipizide'),
+(48,'Microzide','hydrochlorothiazide'),
+(49,'Lortab','hydrocodone and acetaminophen'),
+(50,'Motrin','ibuprophen'),
+(51,'Lantus','insulin glargine'),
+(52,'Imdur','isosorbide mononitrate'),
+(53,'Prevacid','lansoprazole'),
+(54,'Levaquin','levofloxacin'),
+(55,'Levoxl','levothyroxine sodium'),
+(56,'Zestoretic','lisinopril and hydrochlorothiazide'),
+(57,'Prinivil','lisinopril'),
+(58,'Ativan','lorazepam'),
+(59,'Cozaar','losartan'),
+(60,'Mevacor','lovastatin'),
+(61,'Mobic','meloxicam'),
+(62,'Glucophage','metformin HCl'),
+(63,'Medrol','methylprednisone'),
+(64,'Toprol','metoprolol succinate XL'),
+(65,'Lopressor','metoprolol tartrate'),
+(66,'Nasonex','mometasone'),
+(67,'Singulair','montelukast'),
+(68,'Naprosyn','naproxen'),
+(69,'Prilosec','omeprazole'),
+(70,'Percocet','oxycodone and acetaminophen'),
+(71,'Protonix','pantoprazole'),
+(72,'Paxil','paroxetine'),
+(73,'Actos','pioglitazone'),
+(74,'Klor-Con','potassium Chloride'),
+(75,'Pravachol','pravastatin'),
+(76,'Deltasone','prednisone'),
+(77,'Lyrica','pregabalin'),
+(78,'Phenergan','promethazine'),
+(79,'Seroquel','quetiapine'),
+(80,'Zantac','ranitidine'),
+(81,'Crestor','rosuvastatin'),
+(82,'Zoloft','sertraline HCl'),
+(83,'Viagra','sildenafil HCl'),
+(84,'Vytorin','simvastatin and ezetimibe'),
+(85,'Zocor','simvastatin'),
+(86,'Aldactone','spironolactone'),
+(87,'Bactrim DS','sulfamethoxazole and trimethoprim DS'),
+(88,'Flomax','tamsulosin'),
+(89,'Restoril','temezepam'),
+(90,'Topamax','topiramate'),
+(91,'Ultram','tramadol'),
+(92,'Aristocort','triamcinolone Ace topical'),
+(93,'Desyrel','trazodone HCl'),
+(94,'Dyazide','triamterene and hydrochlorothiazide'),
+(95,'Valtrex','valaciclovir'),
+(96,'Diovan','valsartan'),
+(97,'Effexor XR','venlafaxine XR'),
+(98,'Calan SR','verapamil SR'),
+(99,'Ambien','zolpidem');
+
+--
+-- Pharmacy Entry
+--
+insert into `Pharmacy` (`name`, `address`, `phone`, `supervisor`) values ('CVS', '7 Albert Street', '9999999999','Karen');
