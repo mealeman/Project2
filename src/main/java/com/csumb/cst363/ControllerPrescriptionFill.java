@@ -45,14 +45,43 @@ public class ControllerPrescriptionFill {
 	public String processFillForm(Prescription p,  Model model) {
 
 		
-		if(!p.getRxid().equals("") && !p.getPharmacyName().equals("") && !p.getPharmacyAddress().equals("")) {
-	
-			// check the rx number goes to a prescription
+		if(!p.getRxid().equals("") && !p.getPharmacyName().equals("") && !p.getPharmacyAddress().equals("") && !p.getPatientLastName().equals("")) {
+			if(!p.getRxid().matches("^-?\\d+$")) {
+				model.addAttribute("message", "Invalid Rxid");
+				model.addAttribute("prescription", p);
+				return "prescription_fill";
+			}
+			
+			if(p.getPharmacyAddress().matches(".*[!@#$%^&*()]+.*")) {
+				model.addAttribute("message", "Invalid Address: no special characters allowed");
+				model.addAttribute("prescription", p);
+				return "prescription_fill";
+			}
+			
+			if(p.getPharmacyName().matches(".*[!@#$%^&*()]+.*")) {
+				model.addAttribute("message", "Invalid Pharmacy Name: no special characters allowed");
+				model.addAttribute("prescription", p);
+				return "prescription_fill";
+			}
+			
+			if(p.getPatientLastName().matches(".*[!@#$%^&*()]+.*")) {
+				model.addAttribute("message", "Invalid Patient Name: no special characters allowed");
+				model.addAttribute("prescription", p);
+				return "prescription_fill";
+			}
+			
+			// check the rx number goes to a prescription and last name matches
 			try(Connection con=getConnection();){
-				PreparedStatement ps = con.prepareStatement("select rxnumber from Prescription where rxnumber=?");
+				PreparedStatement ps = con.prepareStatement("select Patient.last_name from Prescription, Patient where Prescription.patient = Patient.patientid and rxnumber=?");
 				ps.setString(1, p.getRxid());
 				ResultSet rs = ps.executeQuery();
-				if(!rs.next()) {
+				if(rs.next()){
+					if(!rs.getString(1).equals(p.getPatientLastName())) {
+						model.addAttribute("message", "Prescription does not correspond to patient");
+						model.addAttribute("prescription", p);
+						return "prescription_fill";
+					}
+				}else{
 					model.addAttribute("message", "Prescription does not exist");
 					model.addAttribute("prescription", p);
 					return "prescription_fill";
@@ -105,7 +134,7 @@ public class ControllerPrescriptionFill {
 			String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
 			//Update prescription with pharmacyid, name, address, today's date
 			try(Connection con=getConnection();){
-				PreparedStatement ps = con.prepareStatement("update Prescription set pharmacy=?, pharmacy_id=?, date=STR_TO_DATE(?, '%d-%m-%Y') where rxnumber=?");
+				PreparedStatement ps = con.prepareStatement("update Prescription set pharmacy_name=?, pharmacy_id=?, date=STR_TO_DATE(?, '%d-%m-%Y') where rxnumber=?");
 				ps.setString(1, p.getPharmacyName());
 				ps.setString(2, p.getPharmacyID());
 				ps.setString(3,date);
@@ -113,7 +142,7 @@ public class ControllerPrescriptionFill {
 				p.setDateFilled(date);
 				int rc = ps.executeUpdate();
 				if(rc==1) {
-					PreparedStatement prs = con.prepareStatement("select Doctor.ssn, Doctor.first_name, Doctor.last_name, Patient.ssn, Patient.first_name, Patient.last_name, tradename, quantity, price, Pharmacy.phone from Prescription, Doctor, Patient, Pharmacy where Prescription.doctor = Doctor.id and Prescription.patient = Patient.patientid and Prescription.pharmacy = Pharmacy.name and rxnumber=?");
+					PreparedStatement prs = con.prepareStatement("select Doctor.ssn, Doctor.first_name, Doctor.last_name, Patient.ssn, Patient.first_name, Patient.last_name, tradename, quantity, price, Pharmacy.phone from Prescription, Doctor, Patient, Pharmacy where Prescription.doctor = Doctor.id and Prescription.patient = Patient.patientid and Prescription.pharmacy_name = Pharmacy.name and rxnumber=?");
 					prs.setString(1, p.getRxid());
 					ResultSet rs = prs.executeQuery();
 					if(rs.next()) {
