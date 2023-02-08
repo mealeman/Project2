@@ -54,7 +54,7 @@ public class PopulateData {
 				String practice_since = Integer.toString(2000+rand.nextInt(20));
 				//ensure generated ssn is unique between all patients and doctors
 				while(allSSN.contains(ssn)) {
-					ssn=Integer.toString(12345000+rand.nextInt(10000));
+					ssn=Integer.toString(123450000+rand.nextInt(10000));
 				}
 				allSSN.add(ssn);
 				String lastname=lastNames[rand.nextInt(lastNames.length)];
@@ -87,7 +87,7 @@ public class PopulateData {
 			
 			for(int i=1; i<=100; i++) {
 				while(allSSN.contains(ssn)) {
-					ssn=Integer.toString(12345000+rand.nextInt(10000));
+					ssn=Integer.toString(123450000+rand.nextInt(10000));
 				}
 				allSSN.add(ssn);
 				String lastname=lastNames[rand.nextInt(lastNames.length)];
